@@ -11,19 +11,33 @@ MC::MC(int32_t creation_ts, float lambda) {
 }
 
 void MC::append(std::vector<uint16_t> input_point, int32_t input_ts) {
-	std::cout<<"Appending point and ts "<< input_ts<<std::endl;
+	
+	// for (int32_t t : this->ts_array){
+	// 	std::cout<<"Pre append array element: "<<t<<std::endl;
+		
+	
+	// }
 
-	std::cout<<"ts size before "<<this->ts_array.size()<<std::endl;
+	//std::cout<<"ts size before "<<this->ts_array.size()<<std::endl;
 
 	this->point_array.push_back(input_point);
 	this->ts_array.push_back(input_ts);
 
-	std::cout<<"ts size after "<<this->ts_array.size()<<std::endl;
+	//std::cout<<"ts size after "<<this->ts_array.size()<<std::endl;
+
+	
+	//std::cout<<"Appended point and ts: "<< input_ts<<std::endl;
+
+	// for (int32_t t : this->ts_array){
+	// 	std::cout<<"Post append array element: "<<t<<std::endl;
+		
+	
+	// }
 
 }
 
 void MC::pop() {
-	//std::cout<<"Popping point and ts ":endl;
+	//std::cout<<"Popping point and ts: "<<this->ts_array.back()<<std::endl;
 
 	this->point_array.pop_back();
 	this->ts_array.pop_back();
@@ -40,7 +54,11 @@ std::tuple<float,double,std::vector<double>> MC::calculateRadius(int32_t input_t
 	float radius=sqrt(abs( (sqrt(cf2[0]*cf2[0]+cf2[1]*cf2[1])/this->weight) - pow((sqrt(cf1[0]*cf1[0]+cf1[1]*cf1[1])/this->weight),2) )); 
 	
 	//std::cout<<"Radius: "<<radius<<std::endl;
-	std::cout<<"Weight: "<<this->weight<<std::endl;
+	// std::cout<<"Fading array size: "<<fading_array.size()<<std::endl;
+	// for (int i = 0; i < fading_array.size(); i++){
+	// 	std::cout<<"Fading array element: "<<fading_array[i]<<std::endl;
+	// }
+	// std::cout<<"Weight: "<<this->weight<<std::endl;
 	
 	return std::make_tuple(radius,this->weight,cf1);
 }
@@ -52,13 +70,14 @@ std::vector<double> MC::fadingFunction(int32_t input_ts){
 
 	
 	for (int32_t t : this->ts_array){
+		//std::cout<<"Fading input ts array element: "<<t<<std::endl;
 		fading_array.push_back(pow(2,-this->lambda*(input_ts-t)));
 		//std::cout<<ts_array.size()<<std::endl;
 		//std::cout<<pow(2,-this->lambda*(input_ts-t))<<std::endl;
-		std::cout<<t<<std::endl;
+	
 	}
 
-	std::cout<<std::endl<<std::endl;
+	
 
 	return fading_array;
 

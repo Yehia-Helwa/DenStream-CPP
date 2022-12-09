@@ -8,13 +8,15 @@ private:
     float lambda;
     
     std::vector< std::vector<uint16_t> > point_array;
-    std::vector<int32_t> ts_array;
+   
     
     
 
    
 
 public:
+    std::vector<int32_t> ts_array;
+
     double weight;
     std::vector<double> center = {0,0};
 

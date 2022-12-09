@@ -33,7 +33,6 @@ void DenStream::mergingPoint() {
     std::cout<<"Start O clusters: "<<o_micro_clusters.size()<<std::endl;
     std::cout<<"Start P clusters: "<<p_micro_clusters.size()<<std::endl;
     
-    bool merged=false;
     if (p_micro_clusters.size()>0){
         std::cout<<"p micro size is nonzero "<<std::endl;
         //find closest cluster index
@@ -63,8 +62,9 @@ void DenStream::mergingPoint() {
 
         if (r_p<=this->epsilon){
             std::cout<<"Merging p into p cluster: "<<closest_p_index<<std::endl;
+            
             closest_p_cluster.updateParameters(1,0,cf1,weight);
-            merged=true;
+            
             
         }
         else{
@@ -73,7 +73,7 @@ void DenStream::mergingPoint() {
        
     }
 
-    if (o_micro_clusters.size()>0 && (merged==false)) {
+    if (o_micro_clusters.size()>0) {
         std::cout<<"o micro size is nonzero" <<std::endl;
 
         int closest_o_index = findClosestCluster(this->o_micro_clusters,this->point);
@@ -91,10 +91,8 @@ void DenStream::mergingPoint() {
 
         if (r_o<=this->epsilon){
             std::cout<<"Merging p into o cluster: "<<closest_o_index<<std::endl;
-            merged=true;
-            std::cout<<"Weight: "<<closest_o_cluster.weight<<"   Beta*Mu: "<<this->beta*this->mu<<std::endl;
+            std::cout<<closest_o_cluster.weight<<"  "<<this->beta*this->mu<<std::endl;
             closest_o_cluster.updateParameters(1,0,cf1,weight);
-            
             if (closest_o_cluster.weight > (this->beta*this->mu)){
                 std::cout<<"Adding p into new p cluster"<<std::endl;
                 p_micro_clusters.push_back(closest_o_cluster);
@@ -106,11 +104,10 @@ void DenStream::mergingPoint() {
         } 
     }
 
-    if  (merged==false){
-        MC new_o_cluster(this->ts,this->lambda);
-        new_o_cluster.append(this->point,this->ts);
-        this->o_micro_clusters.push_back(new_o_cluster);
-    }
+    
+    MC new_o_cluster(this->ts,this->lambda);
+    new_o_cluster.append(this->point,this->ts);
+    this->o_micro_clusters.push_back(new_o_cluster);
     
 
 
@@ -135,15 +132,6 @@ void DenStream::mergingPoint() {
 	//     }
      
     // }
-
-
-    if (p_micro_clusters.size()>0){
-        for (MC i : p_micro_clusters){
-            
-            std::cout<<"P cluster center: "<<i.center[0]<<"  "<<i.center[1]<<std::endl;
-	        	
-	    }
-    }
   
 }
 

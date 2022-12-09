@@ -4,6 +4,7 @@
 #include <vector>
 #include <sstream>
 #include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <cmath>
 
@@ -47,7 +48,7 @@ int main()
     
 
 
-    DenStream den=DenStream(0.001,50,0.2,10);
+    DenStream den=DenStream(0.001,10,0.1,1);
 
 
     den.calcTp();
@@ -67,8 +68,17 @@ int main()
             int32_t current_ts = (i*chunk_size)+j; 
 
             cvEvents.at<cv::Vec3b>(current_y, current_x) = -1 ? cv::Vec3b{255, 255, 255} : cv::Vec3b{0, 0, 0};
-            den.updateDenstream(current_point,current_ts);
+            den.updateDenstream(current_point,current_ts+1);
         }
+        cv::Point center(100, 100);//Declaring the center point
+        int radius = 10; //Declaring the radius
+        cv::Scalar line_Color(255, 0, 0);//Color of the circle
+        int thickness = 2;//thickens of the line
+        cv::circle(cvEvents, center,radius, line_Color, thickness);
+
+        cv::Point center1(150, 100);//Declaring the center point
+        cv::circle(cvEvents, center1,radius, line_Color, thickness);
+
         cv::imshow("PLOT_EVENTS", cvEvents);
         cv::waitKey(1);   
     
