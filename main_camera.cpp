@@ -9,12 +9,28 @@
 
 #include <unistd.h>
 
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <cmath>
+
+#include "DenStream.hpp"
+
 
 #if !defined(LIBCAER_HAVE_OPENCV) || LIBCAER_HAVE_OPENCV == 0
 #	error "This example requires OpenCV support in libcaer to be enabled."
 #endif
 
 
+
+#define LAMBDA 10000
+#define EPSILON 10
+#define BETA 1
+#define MU 20
+
+#define OVERFLOW_LIMIT 50000
 
 static std::atomic_bool globalShutdown(false);
 
@@ -91,6 +107,21 @@ int main(void) {
 	cv::namedWindow("PLOT_EVENTS",
 		cv::WindowFlags::WINDOW_AUTOSIZE | cv::WindowFlags::WINDOW_KEEPRATIO | cv::WindowFlags::WINDOW_GUI_EXPANDED);
 
+
+
+    DenStream den=DenStream(LAMBDA,EPSILON,BETA,MU); //mill
+
+    
+    int thickness = 2;//thickens of the line
+    cv::Point center;//Declaring the center point
+    int radius;
+    int rng_color_seed=12345;
+
+    cv::RNG rng(rng_color_seed);
+
+    int count=0;
+
+
 	while (!globalShutdown.load(std::memory_order_relaxed)) {
 		std::unique_ptr<libcaer::events::EventPacketContainer> packetContainer = handle.dataGet();
 		if (packetContainer == nullptr) {
@@ -109,6 +140,10 @@ int main(void) {
 				packet->getEventCapacity());
 
 			if (packet->getEventType() == POLARITY_EVENT) {
+				bool overflow = false;
+				if (packet->getEventNumber()>OVERFLOW_LIMIT){
+					overflow=true;
+				}
 				std::shared_ptr<const libcaer::events::PolarityEventPacket> polarity
 					= std::static_pointer_cast<libcaer::events::PolarityEventPacket>(packet);
 
@@ -125,14 +160,32 @@ int main(void) {
 				cv::Mat cvEvents(480, 640, CV_8UC3, cv::Vec3b{127, 127, 127});
 				// usleep(10);
 				for (const auto &e : *polarity) {
-					// printf("First polarity event - ts: %d, x: %d, y: %d, pol: %d.\n", ts, e.getX(), e.getY(), pol);
+					//printf("First polarity event - ts: %d, x: %d, y: %d, pol: %d.\n", ts, e.getX(), e.getY(), pol);
 					
 					cvEvents.at<cv::Vec3b>(e.getY(), e.getX())
 						= e.getPolarity() ? cv::Vec3b{255, 255, 255} : cv::Vec3b{0, 0, 0};
+
+                    std::vector<uint16_t> current_point = {e.getX(),e.getY()};
+
+                    if(e.getPolarity()==0 && overflow==false){
+                        cv::Scalar rng_line_color(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
+                        den.updateDenstream(current_point,e.getTimestamp(),rng_line_color);
+                    }
 				}
 
+
+                std::vector<MC> plot_clusters = den.getClusters();
+                for (MC cluster : plot_clusters){
+
+                    center=cv::Point(cluster.center[0],cluster.center[1]);
+                    radius=2;
+                    cv::circle(cvEvents, center,radius, cluster.line_color, thickness);
+                    // cv::circle(cvEvents,cv::Point(10,10),50, line_Color, thickness);
+                
+                }
 				cv::imshow("PLOT_EVENTS", cvEvents);
 				cv::waitKey(1);
+                count++;
 				// std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 		}
