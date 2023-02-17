@@ -22,8 +22,8 @@
 
 int main()
 {
-    int chunk_size = 100;
-    int plot_wait_ms=10;
+    int chunk_size = 1000;
+    int plot_wait_ms=1;
     // chunk_size=1;
     // event_array_length=100000;
 
@@ -120,7 +120,13 @@ int main()
             //std::cout<<"point: "<<current_point[0]<<"  "<<current_point[1]<<std::endl;
             
             cv::Scalar rng_line_color(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
-            den.updateDenstream(current_point,current_ts,rng_line_color);
+
+            ankerl::nanobench::Bench().run("updating", [&]() {
+
+                den.updateDenstream(current_point,current_ts,rng_line_color);
+
+            });
+            // den.updateDenstream(current_point,current_ts,rng_line_color);
         }
 
         std::vector<MC> plot_clusters = den.getClusters();

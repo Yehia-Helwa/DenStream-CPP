@@ -138,7 +138,7 @@ void DenStream::mergingPoint( cv::Scalar rng_line_color) {
     //     pruneClusters();
 
     // });
-
+    
     // std::cout<<"End O clusters: "<<o_micro_clusters.size()<<std::endl;
     // std::cout<<"End P clusters: "<<p_micro_clusters.size()<<std::endl;
 
